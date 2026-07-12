@@ -1,0 +1,94 @@
+# ==========================
+# Node.js / React
+# ==========================
+node_modules/
+dist/
+build/
+.vite/
+.turbo/
+coverage/
+
+# ==========================
+# Python
+# ==========================
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.python-version
+
+# ==========================
+# Environment Variables
+# ==========================
+.env
+.env.*
+!.env.example
+
+backend/.env
+backend/.env.local
+
+frontend/.env
+frontend/.env.local
+
+# ==========================
+# Firebase
+# ==========================
+
+# Firebase Admin SDK (VERY IMPORTANT)
+backend/firebase/serviceAccount.json
+
+# Any other downloaded service account keys
+*firebase-adminsdk*.json
+
+# Firebase CLI
+.firebase/
+
+# ==========================
+# Logs
+# ==========================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==========================
+# IDEs
+# ==========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==========================
+# Operating System
+# ==========================
+.DS_Store
+Thumbs.db
+
+# ==========================
+# Temporary Files
+# ==========================
+tmp/
+temp/
+backend/temp/
+backend/uploads/
+
+# ==========================
+# AI Model Cache (Future)
+# ==========================
+models/
+checkpoints/
+weights/
+*.pt
+*.onnx
+*.engine
+
+# ==========================
+# Miscellaneous
+# ==========================
+*.sqlite3
+*.db
