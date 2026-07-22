@@ -14,26 +14,40 @@ _firebase_app = None
 def initialize_firebase_admin():
     global _firebase_app
 
+    # Already cached in this module
     if _firebase_app is not None:
+        return _firebase_app
+
+    # Already initialized elsewhere in this process
+    if firebase_admin._apps:
+        _firebase_app = firebase_admin.get_app()
         return _firebase_app
 
     settings = get_settings()
     options: dict[str, str] = {}
 
     if settings.project_id:
-        options['projectId'] = settings.project_id
+        options["projectId"] = settings.project_id
 
     if settings.service_account_path:
         credential_path = Path(settings.service_account_path)
+
         if not credential_path.exists():
-            raise FileNotFoundError(f'Service account file not found: {credential_path}')
+            raise FileNotFoundError(
+                f"Service account file not found: {credential_path}"
+            )
+
         cred = credentials.Certificate(str(credential_path))
-        _firebase_app = firebase_admin.initialize_app(cred, options or None)
+        _firebase_app = firebase_admin.initialize_app(
+            cred,
+            options or None,
+        )
     else:
-        _firebase_app = firebase_admin.initialize_app(options=options or None)
+        _firebase_app = firebase_admin.initialize_app(
+            options=options or None,
+        )
 
     return _firebase_app
-
 
 def _ensure_app():
     return _firebase_app or initialize_firebase_admin()

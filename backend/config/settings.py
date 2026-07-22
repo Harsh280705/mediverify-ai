@@ -9,8 +9,11 @@ class Settings(BaseSettings):
 
     service_account_path: str | None = Field(default=None, alias='SERVICE_ACCOUNT_PATH')
     project_id: str | None = Field(default=None, alias='PROJECT_ID')
+    ollama_model: str = Field(default='qwen3:8b', alias='OLLAMA_MODEL')
+    ollama_base_url: str = Field(default='http://localhost:11434', alias='OLLAMA_BASE_URL')
 
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return Settings()
+

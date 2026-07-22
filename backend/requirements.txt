@@ -1,5 +1,51 @@
+# ===========================
+# Backend Framework
+# ===========================
 fastapi==0.116.1
 uvicorn[standard]==0.35.0
-firebase-admin==7.1.0
 pydantic-settings==2.10.1
 python-dotenv==1.1.1
+
+# ===========================
+# Firebase
+# ===========================
+firebase-admin==7.1.0
+
+# ===========================
+# OCR & Document Processing
+# ===========================
+easyocr==1.7.2
+pymupdf==1.26.3
+pdf2image==1.17.0
+pillow==11.3.0
+pillow-heif==1.1.0
+
+# ===========================
+# Computer Vision
+# ===========================
+opencv-python==4.12.0.88
+opencv-contrib-python==4.12.0.88
+numpy==2.2.6
+
+# ===========================
+# AI & Machine Learning
+# ===========================
+torch==2.8.0
+torchvision==0.23.0
+ultralytics==8.3.170
+rapidfuzz==3.14.1
+
+# ===========================
+# Scientific Computing
+# ===========================
+scipy==1.16.1
+matplotlib==3.10.5
+
+# ===========================
+# Utilities
+# ===========================
+requests==2.32.5
+tqdm==4.67.1
+PyYAML==6.0.2
+
+email-validator==2.3.0

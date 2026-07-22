@@ -30,6 +30,13 @@ Day 1 foundation for the MediVerify AI hackathon project.
 - Download a service account JSON file for the backend and point `SERVICE_ACCOUNT_PATH` to it
 - Fill in the frontend Firebase client values in `frontend/.env`
 
-## Day 1 scope
+## YOLO-Based Vision System (Migration from MediaPipe)
 
-OCR, computer vision, medication verification, AI agents, reminder logic, and timeline intelligence are intentionally not implemented yet.
+The real-time computer vision verification pipeline has been migrated from MediaPipe to a YOLOv8-based model (`yolov8n.pt`).
+
+### Key Details
+- **MediaPipe Removal**: MediaPipe Hands and Face Mesh have been completely removed due to the deprecation of the legacy Solutions API in modern runtimes, causing import and build failures.
+- **YOLOv8 Selection**: YOLOv8 provides extremely fast and lightweight object detection and person bounding boxes. 
+- **Singleton Model Manager & Caching**: A unified `YOLOModelManager` lazy-loads the model and caches predictions for each unique image frame. This prevents redundant model executions and allows Tablet, Hand, and Face trackers to share a single inference pass.
+- **OpenCV Fallback**: Retained OpenCV color/shape heuristics as a secondary backup. If YOLOv8 is unavailable or doesn't detect a person/object, the trackers gracefully fall back to the OpenCV implementation to prevent crashes.
+

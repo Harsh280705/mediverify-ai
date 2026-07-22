@@ -48,9 +48,11 @@ export default function Register() {
               options={[
                 { value: ROLES.PATIENT, label: 'Patient' },
                 { value: ROLES.CAREGIVER, label: 'Caregiver' },
+                { value: ROLES.DOCTOR, label: 'Doctor' },
               ]}
               required
             />
+
             {error ? <p className="text-sm text-rose-300">{error}</p> : null}
             <PrimaryButton type="submit" disabled={submitting} className="w-full">
               {submitting ? 'Creating account...' : 'Register'}
