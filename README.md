@@ -105,5 +105,12 @@ MediVerify AI was developed as a team project for **HackVenture 2026 proof-of-co
 
 **Computer Vision + OCR + Local LLMs + Web Development + Cloud Data + Real-Time Analytics**
 
-User Flow of the Project:
+**User Flow of the Project:**
+
 <img width="1024" height="1536" alt="User Flow" src="https://github.com/user-attachments/assets/3ae92736-5601-425d-abcc-304c90a14773" />
+
+
+**System Architecture Overview:**
+<img width="475" height="808" alt="System Architecture Overview" src="https://github.com/user-attachments/assets/a0584bb5-f791-4dec-8973-487b9f389ebd" />
+
+
