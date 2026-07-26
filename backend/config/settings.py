@@ -11,9 +11,16 @@ class Settings(BaseSettings):
     project_id: str | None = Field(default=None, alias='PROJECT_ID')
     ollama_model: str = Field(default='qwen3:8b', alias='OLLAMA_MODEL')
     ollama_base_url: str = Field(default='http://localhost:11434', alias='OLLAMA_BASE_URL')
+    verification_mode: str = Field(default='production', alias='VERIFICATION_MODE')
+    demo_mode: bool = Field(default=False, alias='DEMO_MODE')
+
+    @property
+    def is_demo(self) -> bool:
+        return self.verification_mode.lower() == 'demo' or self.demo_mode
 
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return Settings()
+
 

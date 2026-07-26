@@ -252,7 +252,11 @@ export default function VerifyMedicine() {
   if (loading) {
     return (
       <PageShell eyebrow="Medicine Verification" title="Loading..." description="Fetching today's medication.">
-        <p className="text-slate-400">Please wait while we load details...</p>
+        <div className="flex flex-col items-center justify-center py-12 text-slate-400 space-y-4 animate-pulse">
+          <span className="text-4xl animate-spin">⏳</span>
+          <p className="text-sm font-semibold text-white">Connecting to Verification Services...</p>
+          <p className="text-xs text-slate-500">Please wait while we fetch medication details.</p>
+        </div>
       </PageShell>
     );
   }
@@ -276,9 +280,13 @@ export default function VerifyMedicine() {
 
   return (
     <PageShell
-      eyebrow="AI Assist Mode"
+      eyebrow={schedule?.demoMode ? "Demo Mode - Gesture-Based Verification" : "AI Assist Mode"}
       title="Verify Medication"
-      description="Hold the prescribed medicine strip or bottle in front of the camera. The AI will verify compliance automatically."
+      description={
+        schedule?.demoMode
+          ? "Demo Mode is active. Complete the gesture sequence to simulate and verify medication adherence without actual ingestion."
+          : "Hold the prescribed medicine strip or bottle in front of the camera. The AI will verify compliance automatically."
+      }
     >
       {/* Verification Success Full-Screen Overlay */}
       {verifiedSuccess && (
@@ -289,6 +297,22 @@ export default function VerifyMedicine() {
           <h2 className="mt-6 text-3xl font-extrabold text-white">Dose Verified Successfully!</h2>
           <p className="mt-2 text-sm text-slate-400">Updating schedule status to Taken...</p>
           <p className="mt-1 text-xs text-indigo-300 font-semibold">Redirecting to Dashboard in 3s</p>
+        </div>
+      )}
+
+      {/* Demo Mode Badge/Banner */}
+      {schedule?.demoMode && (
+        <div className="mb-6 flex items-center gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.05)] backdrop-blur-md">
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+          </span>
+          <div className="text-sm font-medium flex items-center flex-wrap gap-2">
+            <span className="font-bold text-white uppercase tracking-wider text-[10px] px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/30">
+              Demo Mode
+            </span>
+            <span>Gesture-Based Verification is active. Actual ingestion is not required.</span>
+          </div>
         </div>
       )}
 

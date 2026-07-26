@@ -113,9 +113,16 @@ export default function DoctorDashboard() {
           <div className="mt-6">
             <SectionCard title="My Patient Panel">
               {loading ? (
-                <p className="text-sm text-slate-400">Loading patients...</p>
+                <div className="flex flex-col items-center justify-center py-4 text-slate-400 space-y-2 animate-pulse">
+                  <span className="text-xl">⏳</span>
+                  <p className="text-xs font-medium text-slate-350">Loading patients...</p>
+                </div>
               ) : patients.length === 0 ? (
-                <p className="text-sm text-slate-500">No patients assigned yet.</p>
+                <div className="flex flex-col items-center justify-center py-6 text-center text-slate-400 space-y-2">
+                  <span className="text-3xl">👥</span>
+                  <p className="text-xs font-semibold text-white">No Patients Assigned</p>
+                  <p className="text-[10px] text-slate-450 max-w-[160px]">Assign a patient above to monitor.</p>
+                </div>
               ) : (
                 <div className="divide-y divide-white/15">
                   {patients.map((p) => (
@@ -143,7 +150,10 @@ export default function DoctorDashboard() {
         <div className="lg:col-span-2">
           <SectionCard title="⚠️ Active High-Risk Adherence Alerts (Missed Doses ≥ 2)">
             {loading ? (
-              <p className="text-sm text-slate-400">Loading active alerts...</p>
+              <div className="flex flex-col items-center justify-center py-12 text-slate-400 space-y-3 animate-pulse">
+                <span className="text-3xl">⏳</span>
+                <p className="text-sm font-medium text-slate-300">Fetching adherence alerts...</p>
+              </div>
             ) : alerts.length === 0 ? (
               <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/5 text-slate-500">
                 <span className="text-2xl">🎉</span>

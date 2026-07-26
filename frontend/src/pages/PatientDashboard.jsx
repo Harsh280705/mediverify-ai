@@ -119,13 +119,16 @@ export default function PatientDashboard() {
         <SectionCard title="Today's Medicines">
 
           {loadingSchedule ? (
-
-            <p>Loading today's medicines...</p>
-
+            <div className="flex flex-col items-center justify-center py-8 text-slate-400 space-y-3 animate-pulse">
+              <span className="text-3xl">⏳</span>
+              <p className="text-sm font-medium text-slate-300">Retrieving today's schedule...</p>
+            </div>
           ) : todaySchedule.length === 0 ? (
-
-            <p>No medicines scheduled for today.</p>
-
+            <div className="flex flex-col items-center justify-center py-8 text-center text-slate-400 space-y-2">
+              <span className="text-4xl">👍</span>
+              <p className="text-sm font-semibold text-white">All Clear!</p>
+              <p className="text-xs text-slate-450 max-w-[220px]">No medications scheduled for today.</p>
+            </div>
           ) : (
 
             todaySchedule.map((item) => (

@@ -93,9 +93,16 @@ export default function CaregiverDashboard() {
 
           <SectionCard title="Linked Family Panel">
             {loading ? (
-              <p className="text-sm text-slate-400">Loading linked members...</p>
+              <div className="flex flex-col items-center justify-center py-4 text-slate-400 space-y-2 animate-pulse">
+                <span className="text-xl">⏳</span>
+                <p className="text-xs font-medium text-slate-350">Loading linked members...</p>
+              </div>
             ) : patients.length === 0 ? (
-              <p className="text-sm text-slate-500">No family members linked yet.</p>
+              <div className="flex flex-col items-center justify-center py-6 text-center text-slate-400 space-y-2">
+                <span className="text-3xl">👥</span>
+                <p className="text-xs font-semibold text-white">No Linked Members</p>
+                <p className="text-[10px] text-slate-450 max-w-[160px]">Add family member's email above to link.</p>
+              </div>
             ) : (
               <div className="divide-y divide-white/10">
                 {patients.map((p) => (

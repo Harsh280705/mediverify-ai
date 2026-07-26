@@ -9,7 +9,63 @@ class FaceMeshTracker:
     def __init__(self):
         # MediaPipe FaceMesh references are removed.
         # YOLO model is lazily loaded via YOLOModelManager.
-        pass
+        self._dark_ratio_history = []
+        self._mouth_open_state = False
+        self._consecutive_open_count = 0
+        self._consecutive_closed_count = 0
+
+    def _update_mouth_state(self, dark_ratio: float) -> tuple:
+        if not hasattr(self, "_dark_ratio_history"):
+            self._dark_ratio_history = []
+        if not hasattr(self, "_mouth_open_state"):
+            self._mouth_open_state = False
+        if not hasattr(self, "_consecutive_open_count"):
+            self._consecutive_open_count = 0
+        if not hasattr(self, "_consecutive_closed_count"):
+            self._consecutive_closed_count = 0
+            
+        # Temporal smoothing: maintain history of up to 10 frames
+        self._dark_ratio_history.append(dark_ratio)
+        if len(self._dark_ratio_history) > 10:
+            self._dark_ratio_history.pop(0)
+            
+        # Confidence averaging
+        avg_dark_ratio = sum(self._dark_ratio_history) / len(self._dark_ratio_history)
+        
+        # Consecutive frame validation / debounce logic:
+        # We classify individual frames:
+        #   If dark_ratio > 0.36, frame is open
+        #   If dark_ratio < 0.30, frame is closed
+        if dark_ratio > 0.36:
+            self._consecutive_open_count += 1
+            self._consecutive_closed_count = 0
+        elif dark_ratio < 0.30:
+            self._consecutive_closed_count += 1
+            self._consecutive_open_count = 0
+        else:
+            # Decay counts for intermediate values to act as debounce/filter
+            self._consecutive_open_count = max(0, self._consecutive_open_count - 1)
+            self._consecutive_closed_count = max(0, self._consecutive_closed_count - 1)
+
+        # Hysteresis + Debounce logic:
+        # To open: avg_dark_ratio must exceed 0.36 AND we must see at least 3 consecutive open frames
+        # To close: avg_dark_ratio must drop below 0.32 AND we must see at least 3 consecutive closed frames
+        if self._mouth_open_state:
+            if avg_dark_ratio < 0.32 or self._consecutive_closed_count >= 3:
+                self._mouth_open_state = False
+        else:
+            if avg_dark_ratio > 0.36 or self._consecutive_open_count >= 3:
+                self._mouth_open_state = True
+                
+        return self._mouth_open_state, not self._mouth_open_state, avg_dark_ratio
+
+    def _reset_mouth_state(self):
+        if hasattr(self, "_dark_ratio_history"):
+            self._dark_ratio_history.clear()
+        self._mouth_open_state = False
+        self._consecutive_open_count = 0
+        self._consecutive_closed_count = 0
+
 
     def detect(self, cv_image) -> dict:
         """
@@ -84,15 +140,16 @@ class FaceMeshTracker:
                                     mouth_h = max(1, min(mouth_h, h - mouth_y))
                                     mouth_w = max(1, min(mouth_w, w - mouth_x))
                                     
-                                    # Calculate dark/light contrast in the mouth region
+                                    # Calculate dark/light contrast in the mouth region with adaptive thresholding
                                     mouth_roi = cv2.cvtColor(cv_image[mouth_y:mouth_y+mouth_h, mouth_x:mouth_x+mouth_w], cv2.COLOR_BGR2GRAY)
-                                    _, thresholded = cv2.threshold(mouth_roi, 40, 255, cv2.THRESH_BINARY_INV)
+                                    mean_brightness = np.mean(mouth_roi) if mouth_roi.size > 0 else 0.0
+                                    adaptive_thresh = int(np.clip(mean_brightness * 0.55, 20, 85))
+                                    _, thresholded = cv2.threshold(mouth_roi, adaptive_thresh, 255, cv2.THRESH_BINARY_INV)
                                     dark_pixels = cv2.countNonZero(thresholded)
                                     total_pixels = mouth_roi.size
                                     
                                     dark_ratio = dark_pixels / total_pixels if total_pixels > 0 else 0.0
-                                    mouth_open = dark_ratio > 0.35
-                                    mar = float(dark_ratio)
+                                    mouth_open, mouth_closed, smoothed_mar = self._update_mouth_state(dark_ratio)
                                     
                                     # Estimate head direction from face center relative to image center
                                     box_center_x = fx + fw / 2
@@ -108,9 +165,9 @@ class FaceMeshTracker:
                                     return {
                                         "detected": True,
                                         "mouth_open": mouth_open,
-                                        "mouth_closed": not mouth_open,
+                                        "mouth_closed": mouth_closed,
                                         "head_direction": direction,
-                                        "mar": mar,
+                                        "mar": smoothed_mar,
                                         "method": "yolo"
                                     }
             except Exception as e:
@@ -157,15 +214,15 @@ class FaceMeshTracker:
                     
                     mouth_roi = cv2.cvtColor(cv_image[mouth_y:mouth_y+mouth_h, mouth_x:mouth_x+mouth_w], cv2.COLOR_BGR2GRAY)
                     
-                    # Calculate dark/light contrast in the mouth region (mouth opening shows a dark cavity)
-                    _, thresholded = cv2.threshold(mouth_roi, 40, 255, cv2.THRESH_BINARY_INV)
+                    # Calculate dark/light contrast in the mouth region with adaptive thresholding (mouth opening shows a dark cavity)
+                    mean_brightness = np.mean(mouth_roi) if mouth_roi.size > 0 else 0.0
+                    adaptive_thresh = int(np.clip(mean_brightness * 0.55, 20, 85))
+                    _, thresholded = cv2.threshold(mouth_roi, adaptive_thresh, 255, cv2.THRESH_BINARY_INV)
                     dark_pixels = cv2.countNonZero(thresholded)
                     total_pixels = mouth_roi.size
                     
                     dark_ratio = dark_pixels / total_pixels if total_pixels > 0 else 0
-                    # If high dark ratio, treat as open mouth
-                    mouth_open = dark_ratio > 0.35
-                    mar = float(dark_ratio)
+                    mouth_open, mouth_closed, smoothed_mar = self._update_mouth_state(dark_ratio)
                     
                     # Estimate head direction from box center relative to image center
                     box_center_x = x + box_w / 2
@@ -178,16 +235,23 @@ class FaceMeshTracker:
                         direction = "left"
                     break
             
+            if not detected:
+                self._reset_mouth_state()
+                mouth_open = False
+                mouth_closed = True
+                smoothed_mar = 0.0
+            
             return {
                 "detected": detected,
                 "mouth_open": mouth_open,
-                "mouth_closed": not mouth_open,
+                "mouth_closed": mouth_closed,
                 "head_direction": direction,
-                "mar": mar,
+                "mar": smoothed_mar,
                 "method": "opencv_fallback"
             }
         except Exception as e:
             logger.error(f"Face tracker OpenCV fallback failed: {e}")
+            self._reset_mouth_state()
             return {
                 "detected": False,
                 "mouth_open": False,

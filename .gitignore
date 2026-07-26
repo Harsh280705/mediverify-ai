@@ -33,15 +33,16 @@ backend/.env.local
 frontend/.env
 frontend/.env.local
 
-# ==========================
 # Firebase
 # ==========================
 
-# Firebase Admin SDK (VERY IMPORTANT)
-backend/firebase/serviceAccount.json
-
-# Any other downloaded service account keys
+# Firebase Admin SDK & Secrets (VERY IMPORTANT)
+serviceAccount.json
+**/serviceAccount.json
+*service-account*.json
+*firebase-admin*.json
 *firebase-adminsdk*.json
+backend/firebase/serviceAccount.json
 
 # Firebase CLI
 .firebase/

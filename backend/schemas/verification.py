@@ -12,6 +12,7 @@ class VerificationResponse(BaseModel):
     timing: str | None = None
     scheduledDateTime: datetime
     status: str
+    demoMode: bool = False
 
 class ProcessFrameRequest(BaseModel):
     frame: str
@@ -30,3 +31,4 @@ class ProcessFrameResponse(BaseModel):
     handDetections: Dict[str, Any]
     faceDetections: Dict[str, Any]
     statusUpdated: bool = False
+    demoMode: bool = False

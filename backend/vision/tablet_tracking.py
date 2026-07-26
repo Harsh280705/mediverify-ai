@@ -41,10 +41,13 @@ class TabletTracker:
                             mapped_class = "medicine_box"
                         
                         if mapped_class:
+                            h, w = cv_image.shape[:2]
+                            norm_bbox = [xyxy[0]/w, xyxy[1]/h, xyxy[2]/w, xyxy[3]/h] if w > 0 and h > 0 else xyxy
                             detections.append({
                                 "class": mapped_class,
                                 "confidence": conf,
-                                "bbox": xyxy
+                                "bbox": xyxy,
+                                "normalized_bbox": norm_bbox
                             })
             except Exception as e:
                 logger.error(f"YOLO detection parsing failed: {e}")
@@ -78,6 +81,8 @@ class TabletTracker:
                 area = cv2.contourArea(cnt)
                 x, y, box_w, box_h = cv2.boundingRect(cnt)
                 
+                norm_bbox = [x/w, y/h, (x + box_w)/w, (y + box_h)/h] if w > 0 and h > 0 else [x, y, x + box_w, y + box_h]
+                
                 # Check for tablets (small, high circularity)
                 if 80 < area < 1200:
                     perimeter = cv2.arcLength(cnt, True)
@@ -86,7 +91,8 @@ class TabletTracker:
                         detections.append({
                             "class": "tablet",
                             "confidence": round(float(circularity), 2),
-                            "bbox": [x, y, x + box_w, y + box_h]
+                            "bbox": [x, y, x + box_w, y + box_h],
+                            "normalized_bbox": norm_bbox
                         })
                 
                 # Check for medicine strip (medium rectangular contour with aspect ratio ~ 1.5 - 3.0)
@@ -96,7 +102,8 @@ class TabletTracker:
                         detections.append({
                             "class": "medicine_strip",
                             "confidence": 0.70,
-                            "bbox": [x, y, x + box_w, y + box_h]
+                            "bbox": [x, y, x + box_w, y + box_h],
+                            "normalized_bbox": norm_bbox
                         })
                 
                 # Check for box (large, solid rectangle)
@@ -104,7 +111,8 @@ class TabletTracker:
                     detections.append({
                         "class": "medicine_box",
                         "confidence": 0.75,
-                        "bbox": [x, y, x + box_w, y + box_h]
+                        "bbox": [x, y, x + box_w, y + box_h],
+                        "normalized_bbox": norm_bbox
                     })
         except Exception as e:
             logger.error(f"Tablet tracker OpenCV fallback failed: {e}")

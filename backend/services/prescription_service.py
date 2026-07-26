@@ -2,12 +2,14 @@ import httpx
 import json
 import logging
 from config.settings import get_settings
+from services.medicine_matcher import MedicineMatcher
 
 logger = logging.getLogger(__name__)
 
 class PrescriptionService:
     def __init__(self) -> None:
         self.settings = get_settings()
+        self.matcher = MedicineMatcher()
 
     async def extract_prescription(self, raw_text: str) -> dict:
         """
@@ -91,6 +93,15 @@ class PrescriptionService:
             medicine_name = str(m.get("medicineName") or m.get("name") or "").strip()
             if not medicine_name:
                 continue
+
+            # Match and normalize extracted medicine name against medicines.json primary database
+            matches = self.matcher.match(medicine_name, threshold=70)
+            if matches:
+                # Use the brand or generic name from the matched database entry
+                best_match = matches[0]
+                matched_name = best_match.get("brand") or best_match.get("generic")
+                if matched_name:
+                    medicine_name = matched_name
 
             # Parse timings
             raw_timings = m.get("timings") or []

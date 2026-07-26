@@ -26,6 +26,7 @@ hand_tracker = HandTracker()
 tablet_tracker = TabletTracker()
 face_tracker = FaceMeshTracker()
 summary_service = SummaryService()
+medicine_matcher = MedicineMatcher()
 
 def get_verification_service():
     return VerificationService()
@@ -81,6 +82,7 @@ def get_verification(
         )
 
     check_schedule_access(current_user, schedule)
+    schedule["demoMode"] = service.is_demo_mode()
     return schedule
 
 @router.post(
@@ -130,15 +132,17 @@ async def process_frame(
         # Keep process running even if OCR errors out temporarily
         ocr_lines = []
 
-    # Fuzzy medicine matching
+    # Calculate robust medicine match confidence using multi-stage matching
     expected_med = schedule.get("medicineName", "")
-    norm_expected = MedicineMatcher.normalize(expected_med)
-    best_match_score = 0.0
-    for line in ocr_lines:
-        norm_line = MedicineMatcher.normalize(line)
-        score = fuzz.WRatio(norm_line, norm_expected)
-        if score > best_match_score:
-            best_match_score = score
+    expected_strength = schedule.get("strength", "")
+    expected_dosage = schedule.get("dosage", "")
+    
+    best_match_score = medicine_matcher.calculate_match_confidence(
+        ocr_lines=ocr_lines,
+        expected_name=expected_med,
+        expected_strength=expected_strength,
+        expected_dosage=expected_dosage
+    )
             
     # YOLO Tracker
     yolo_dets = tablet_tracker.detect(img)
@@ -158,7 +162,7 @@ async def process_frame(
         "match_percentage": best_match_score
     }
 
-    new_state, updated_history, new_confidence = VerificationStateMachine.evaluate(
+    new_state, updated_history, new_confidence = service.evaluate(
         detections,
         payload.currentState,
         payload.history
@@ -206,5 +210,6 @@ async def process_frame(
         yoloDetections=yolo_dets,
         handDetections=hand_dets,
         faceDetections=face_dets,
-        statusUpdated=status_updated
+        statusUpdated=status_updated,
+        demoMode=service.is_demo_mode()
     )
