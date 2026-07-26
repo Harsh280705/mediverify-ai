@@ -99,7 +99,7 @@ Frontend: `http://localhost:5173`
 
 ---
 
-## 🏆 HackVenture 2026
+## HackVenture 2026
 
 MediVerify AI was developed as a team project for **HackVenture 2026 proof-of-concept** exploring the integration of:
 
