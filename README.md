@@ -104,3 +104,6 @@ Frontend: `http://localhost:5173`
 MediVerify AI was developed as a team project for **HackVenture 2026 proof-of-concept** exploring the integration of:
 
 **Computer Vision + OCR + Local LLMs + Web Development + Cloud Data + Real-Time Analytics**
+
+User Flow of the Project:
+<img width="1024" height="1536" alt="User Flow" src="https://github.com/user-attachments/assets/3ae92736-5601-425d-abcc-304c90a14773" />
