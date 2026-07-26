@@ -111,6 +111,7 @@ MediVerify AI was developed as a team project for **HackVenture 2026 proof-of-co
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **System Architecture Overview:**
+
 <img width="475" height="808" alt="System Architecture Overview" src="https://github.com/user-attachments/assets/a0584bb5-f791-4dec-8973-487b9f389ebd" />
 
 
